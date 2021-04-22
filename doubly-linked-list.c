@@ -10,7 +10,6 @@
  */
 
 
-
 #include<stdio.h>
 #include<stdlib.h>
  /* 필요한 헤더파일 추가 if necessary */
@@ -292,7 +291,20 @@ int invertList(headNode* h) {
 		printf("Head Node is not initialized.\n");
 		return 0;
 	}
-
+	if (h->first == NULL) { // 리스트가 공백인지 검사
+		printf("list is empty!\n");
+		return 0;
+	}
+	listNode* prev = NULL;
+	/* 끝까지 이동하며 역순으로 변경 */
+	while (h->first->rlink != NULL) {
+		prev = h->first;
+		h->first = h->first->rlink;
+		prev->rlink = prev->llink;
+		prev->llink = h->first;
+	}
+	h->first->rlink = h->first->llink;
+	h->first->llink = NULL;
 	return 0;
 }
 
@@ -312,11 +324,13 @@ int insertNode(headNode* h, int key) {
 	if (h->first == NULL) { // 리스트가 공백상태면
 		h->first = node; // node를 head로 link
 		node->rlink = NULL;
+		node->llink = NULL;
 	}
 	else {
 		if (h->first->key > key) { // 첫번째 node의 key보다 입력받은 node의 key가 작으면 맨 앞에 삽입
 			node->rlink = h->first; // node 의 rlink를 기존 head에 연결
 			h->first->llink = node;  // 기존 head의 llink를 node에 연결
+			node->llink = NULL;
 			h->first = node; // 헤드 변경
 		}
 		else {
@@ -370,7 +384,6 @@ int deleteNode(headNode* h, int key) {
 		else {
 			/* 삭제될 node의 이전 node와 다음 node의 링크 연결 */
 			if (deleted->rlink) { // 삭제 대상 node의 다음 노드가 존재한다면 (삭제 대상 node가 맨 뒤가 아니면)
-			/* NULL 포인터를 참조하려는 것을 방지 */
 				deleted->llink->rlink = deleted->rlink;
 				deleted->rlink->llink = deleted->llink;
 			}
