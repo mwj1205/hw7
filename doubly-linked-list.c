@@ -273,10 +273,10 @@ int deleteFirst(headNode* h) {
 		printf("list is empty!\n");
 		return 0;
 	}
-
 	listNode* deleted; // 지울 노드 가리킬 포인터
 	deleted = h->first;
 	h->first = deleted->rlink; // 헤드 다음으로 이동
+	h->first->llink = NULL;
 	free(deleted);  // 노드 삭제
 	return 0;
 }
@@ -372,6 +372,7 @@ int deleteNode(headNode* h, int key) {
 	deleted = h->first;
 	if (deleted->key == key) { // 삭제할 node가 맨 앞에 있으면
 		h->first = deleted->rlink; // head 이동
+		h->first->llink = NULL;
 		free(deleted);
 	}
 	else {
