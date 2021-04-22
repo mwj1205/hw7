@@ -190,6 +190,7 @@ int insertLast(headNode* h, int key) {
 	listNode* Toend; // 리스트 끝까지 갈 포인터
 	listNode* node = (listNode*)malloc(sizeof(listNode)); // 노드 생성
 	node->key = key;
+	node->llink = NULL;
 	node->rlink = NULL;
 	Toend = h->first;
 	if (h->first == NULL) { // 리스트가 공백상태면 맨 앞에 node 삽입
@@ -245,6 +246,19 @@ int insertFirst(headNode* h, int key) {
 		printf("Head Node is not initialized.\n");
 		return 0;
 	}
+
+	listNode* node = (listNode*)malloc(sizeof(listNode));
+	node->key = key;
+	node->llink = NULL;
+	if (h->first == NULL) { // 리스트가 공백상태면
+		h->first = node; // node를 head로 link
+		node->rlink = NULL;
+	}
+	else {
+		node->rlink = h->first; // node 의 rlink를 기존 head에 연결
+		h->first->llink = node;  // 기존 head의 llink를 node에 연결
+		h->first = node; // 헤드 변경
+	}
 	return 0;
 }
 
@@ -290,7 +304,39 @@ int insertNode(headNode* h, int key) {
 		printf("Head Node is not initialized.\n");
 		return 0;
 	}
+	listNode* findkey = h->first; // key 검색할 node
+	listNode* prev = NULL; // key 검색할 node의 이전 node
+	listNode* node = (listNode*)malloc(sizeof(listNode));
+	node->key = key;
 
+	if (h->first == NULL) { // 리스트가 공백상태면
+		h->first = node; // node를 head로 link
+		node->rlink = NULL;
+	}
+	else {
+		if (h->first->key > key) { // 첫번째 node의 key보다 입력받은 node의 key가 작으면 맨 앞에 삽입
+			node->rlink = h->first; // node 의 rlink를 기존 head에 연결
+			h->first->llink = node;  // 기존 head의 llink를 node에 연결
+			h->first = node; // 헤드 변경
+		}
+		else {
+			while (findkey != NULL && findkey->key <= key) { // 입력받은 key보다 큰 key를 가진 node 탐색
+				prev = findkey;
+				findkey = findkey->rlink;
+			}
+			if (findkey != NULL) { // 입력받은 key보다 큰 값 발견하면 그 노드 앞에 삽입
+				node->llink = findkey->llink;
+				node->rlink = findkey;
+				findkey->llink->rlink = node;
+				findkey->llink = node;
+			}
+			else { // 입력받은 key보다 큰 값이 없으면 맨 뒤에 삽입
+				node->rlink = NULL;
+				node->llink = prev;
+				prev->rlink = node;
+			}
+		}
+	}
 	return 0;
 }
 
@@ -323,10 +369,13 @@ int deleteNode(headNode* h, int key) {
 		}
 		else {
 			/* 삭제될 node의 이전 node와 다음 node의 링크 연결 */
-			deleted->llink->rlink = deleted->rlink;
-			if (deleted->rlink) { // 삭제 대상 node의 다음 노드가 존재한다면 (NULL이 아니라면)
+			if (deleted->rlink) { // 삭제 대상 node의 다음 노드가 존재한다면 (삭제 대상 node가 맨 뒤가 아니면)
 			/* NULL 포인터를 참조하려는 것을 방지 */
+				deleted->llink->rlink = deleted->rlink;
 				deleted->rlink->llink = deleted->llink;
+			}
+			else { // 삭제 대상 node가 맨 뒤라면
+				deleted->llink->rlink = NULL;
 			}
 			free(deleted);
 		}
